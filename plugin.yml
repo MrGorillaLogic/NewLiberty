@@ -1,0 +1,8 @@
+name: Olympiad
+version: 0.1
+main: arena.newliberty.com.Arena
+commands:
+  olympiad:
+    description: It's a command
+    aliases: [ol]
+softdepend: [Vault]
