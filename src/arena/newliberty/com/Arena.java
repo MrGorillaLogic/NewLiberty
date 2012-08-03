@@ -148,6 +148,8 @@ public class Arena extends JavaPlugin implements Listener {
     		if(event.getEntity().getName().equals(player1.getName())){ //
     		 
     			player2.sendMessage(getConfig().getString("Winner.message")); 
+    			playing.remove(player2);
+    			playing.remove(player1);
     			class Countdown implements Runnable {
                     private int count;
                     private int tid = -1;
@@ -182,8 +184,12 @@ public class Arena extends JavaPlugin implements Listener {
                 new Countdown(getConfig().getInt("Cleanup.time")).start();
 
     		 }
-    		else if(event.getEntity().getName().equals(player2.getName())){ //
-       		 
+    		else if(event.getEntity().getName().equals(player2.getName())){ 
+    			
+    			player2.sendMessage(getConfig().getString("Winner.message")); 
+    			playing.remove(player2);
+    			playing.remove(player1);
+    			
     			class Countdown implements Runnable {
                     private int count;
                     private int tid = -1;
