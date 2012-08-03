@@ -1,5 +1,6 @@
 package arena.newliberty.com;
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,10 +14,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.Set; 
 
 public class Arena extends JavaPlugin implements Listener {
 
@@ -62,6 +62,7 @@ public class Arena extends JavaPlugin implements Listener {
 
         saveConfig(); //save the file
 
+        
         final Server server = getServer();
         server.getPluginManager().registerEvents(this, this);
 
@@ -217,9 +218,14 @@ public class Arena extends JavaPlugin implements Listener {
                 new Countdown(getConfig().getInt("Cleanup.time")).start();
     			
     		 }
-    		 
-            Bukkit.broadcastMessage(ChatColor.GREEN + "The Olympiad arena is now open!");  
-            taken = false; 
+    		long x = getConfig().getInt("Cleanup.time") * 20;
+    		getServer().getScheduler().scheduleSyncDelayedTask(Arena.this, new Runnable() {
+
+    			   public void run() {
+    			       Bukkit.broadcastMessage(ChatColor.GREEN + "The Olympiad arena is now open!");
+    			       taken = false;
+    			   }
+    			}, x);
         }
         
     }
@@ -315,4 +321,6 @@ public class Arena extends JavaPlugin implements Listener {
             new Countdown(config.getInt("Wait.time")).start();
         }
     }
+    
+    
 }
