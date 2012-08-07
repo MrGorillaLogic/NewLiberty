@@ -1,6 +1,8 @@
 package arena.newliberty.com;
 
 
+import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,6 +31,7 @@ public class Arena extends JavaPlugin implements Listener {
     public boolean taken = false; //boolean to see if the arena is taken
     private Player player1;
     private Player player2;
+    public static Economy econ = null;
 
     public void onEnable() {
         // Create all the default configs under a tree
@@ -46,6 +50,7 @@ public class Arena extends JavaPlugin implements Listener {
         config.addDefault("Cleanup.time", 30);
         config.addDefault("Command.help.message", "/olympiad j to join the queue.\n/olympiad l to leave the queue.\n/olympiad c to check your position in the queue.");
         config.addDefault("Timers.check.queue", 100L);
+        getConfig().addDefault("Command.join.price", 100);
 
         config.addDefault("Arena.1.1.x", 0);
         config.addDefault("Arena.1.1.y", 0);
@@ -61,6 +66,8 @@ public class Arena extends JavaPlugin implements Listener {
         config.options().copyDefaults(true);
 
         saveConfig(); //save the file
+        
+        setupEconomy(); //set up vault
 
         
         final Server server = getServer();
@@ -105,20 +112,24 @@ public class Arena extends JavaPlugin implements Listener {
         Player player = (Player) sender;
         if (cmd.getName().equalsIgnoreCase("olympiad") && args.length == 1) {
             if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("j")) {
-                    if (!queue.contains(player)) {
+                    if (!queue.contains(player) && econ.has(player.getPlayerListName(), getConfig().getDouble("Command.join.price"))) {
                         queue.addLast(player);
+                        econ.withdrawPlayer(player.getPlayerListName(), getConfig().getDouble("Command.join.price"));
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.join.message.success")));
                         player.teleport(player.getWorld().getBlockAt(getConfig().getInt("Hold.1.1.x"), getConfig().getInt("Hold.1.1.y"), getConfig().getInt("H.1.1.z")).getLocation());
-                    } else /* if (queue.contains(player)) */ { // At this point the player will always be in the queue
+                    } else 
+                    	if (queue.contains(player))  { // At this point the player will always be in the queue
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.join.message.error.queue")));
-                    }
-                    //TODO this never happens:
-                    /*else {
+                   
+                    	}
+                    else {
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.join.message.error.money")));
-                    }*/
+                    }
+                    
                 
             } else if (args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("l")) {
                 if (queue.remove(player)) {
+                	econ.depositPlayer(player.getPlayerListName(), getConfig().getDouble("Command.join.price"));
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.leave.message.success")));
                 } else {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.leave.message.error.queue")));
@@ -126,6 +137,7 @@ public class Arena extends JavaPlugin implements Listener {
             } else if (args[0].equalsIgnoreCase("check") || args[0].equalsIgnoreCase("c")) {
                 int queuePos = queue.indexOf(player);
                 if (queuePos != -1) {
+                	econ.withdrawPlayer(player.getPlayerListName(), getConfig().getDouble("Command.join.price"));
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.check.message.success").replaceAll("%position%", Integer.toString(queuePos))));
                 } else {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.check.message.error.queue")));
@@ -134,6 +146,9 @@ public class Arena extends JavaPlugin implements Listener {
                 player.sendMessage(ChatColor.BLUE + (getConfig().getString("Command.help.message")));
             }
             return true;
+        }
+        else if (cmd.getName().equalsIgnoreCase("olympiad") && args.length == 0){
+        	player.sendMessage(ChatColor.BLUE + (getConfig().getString("Command.help.message")));
         }
         return false;
     }
@@ -327,6 +342,18 @@ public class Arena extends JavaPlugin implements Listener {
             new Countdown(config.getInt("Wait.time")).start();
         }
     }
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+    
     
     
 }
