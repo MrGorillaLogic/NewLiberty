@@ -3,6 +3,6 @@ version: 0.1
 main: arena.newliberty.com.Arena
 commands:
   olympiad:
-    description: It's a command
+    description: Display the help message.
     aliases: [ol]
 softdepend: [Vault]
