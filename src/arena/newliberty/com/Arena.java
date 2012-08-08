@@ -50,7 +50,8 @@ public class Arena extends JavaPlugin implements Listener {
         config.addDefault("Cleanup.time", 30);
         config.addDefault("Command.help.message", "/olympiad j to join the queue.\n/olympiad l to leave the queue.\n/olympiad c to check your position in the queue.");
         config.addDefault("Timers.check.queue", 100L);
-        getConfig().addDefault("Command.join.price", 100);
+        config.addDefault("Command.join.price", 100);
+        config.addDefault("Winner.prize", 150);
 
         config.addDefault("Arena.1.1.x", 0);
         config.addDefault("Arena.1.1.y", 0);
@@ -161,10 +162,10 @@ public class Arena extends JavaPlugin implements Listener {
     	 if(playing.contains(event.getEntity().getName())){ //error here?
     		 
     		if(event.getEntity().getName().equals(player1.getName())){ //
-    		 
-    			player2.sendMessage(getConfig().getString("Winner.message")); 
     			playing.remove(player1.getName());
     			playing.remove(player2.getName());
+    			player2.sendMessage(getConfig().getString("Winner.message")); 
+    			econ.depositPlayer(player2.getName(), getConfig().getDouble("Winner.prize"));
     			class Countdown implements Runnable {
                     private int count;
                     private int tid = -1;
@@ -212,6 +213,7 @@ public class Arena extends JavaPlugin implements Listener {
     			playing.remove(player1.getName());
     			playing.remove(player2.getName());
     			player1.sendMessage(getConfig().getString("Winner.message")); 
+    			econ.depositPlayer(player1.getName(), getConfig().getDouble("Winner.prize"));
     			
     			class Countdown implements Runnable {
                     private int count;
