@@ -45,7 +45,7 @@ public class Arena extends JavaPlugin implements Listener {
         config.addDefault("Command.check.message.success", "Your position in the queue is: %position%");
         config.addDefault("Command.check.message.error.queue", "You are not in the queue!");
         config.addDefault("Arena.open", "The Olympiad arena is now open!");
-        config.addDefault("Winner.message", "WINNER!\nYou have 30 seconds to collect your items...");
+        config.addDefault("Winner.message", "WINNER!\nPlease collect your items...");
         config.addDefault("Wait.time", 10);
         config.addDefault("Cleanup.time", 30);
         config.addDefault("Command.help.message", "/olympiad j to join the queue.\n/olympiad l to leave the queue.\n/olympiad c to check your position in the queue.");
@@ -163,8 +163,8 @@ public class Arena extends JavaPlugin implements Listener {
     		if(event.getEntity().getName().equals(player1.getName())){ //
     		 
     			player2.sendMessage(getConfig().getString("Winner.message")); 
-    			playing.remove(player2);
-    			playing.remove(player1);
+    			playing.remove(player1.getName());
+    			playing.remove(player2.getName());
     			class Countdown implements Runnable {
                     private int count;
                     private int tid = -1;
@@ -198,12 +198,20 @@ public class Arena extends JavaPlugin implements Listener {
                 
                 new Countdown(getConfig().getInt("Cleanup.time")).start();
 
+                long x = getConfig().getInt("Cleanup.time") * 20;
+        		getServer().getScheduler().scheduleSyncDelayedTask(Arena.this, new Runnable() {
+
+        			   public void run() {
+        			       Bukkit.broadcastMessage(ChatColor.GREEN + "The Olympiad arena is now open!");
+        			       taken = false;
+        			   }
+        			}, x);
+        		
     		 }
     		else if(event.getEntity().getName().equals(player2.getName())){ 
-    			
-    			player2.sendMessage(getConfig().getString("Winner.message")); 
-    			playing.remove(player2);
-    			playing.remove(player1);
+    			playing.remove(player1.getName());
+    			playing.remove(player2.getName());
+    			player1.sendMessage(getConfig().getString("Winner.message")); 
     			
     			class Countdown implements Runnable {
                     private int count;
@@ -237,21 +245,22 @@ public class Arena extends JavaPlugin implements Listener {
 
                 
                 new Countdown(getConfig().getInt("Cleanup.time")).start();
-    			
-    		 }
-    		long x = getConfig().getInt("Cleanup.time") * 20;
-    		getServer().getScheduler().scheduleSyncDelayedTask(Arena.this, new Runnable() {
+                
+                long x = getConfig().getInt("Cleanup.time") * 20;
+        		getServer().getScheduler().scheduleSyncDelayedTask(Arena.this, new Runnable() {
 
-    			   public void run() {
-    			       Bukkit.broadcastMessage(ChatColor.GREEN + "The Olympiad arena is now open!");
-    			       taken = false;
-    			   }
-    			}, x);
+        			   public void run() {
+        			       Bukkit.broadcastMessage(ChatColor.GREEN + "The Olympiad arena is now open!");
+        			       taken = false;
+        			   }
+        			}, x);
+    		 }
+    		
         }
         
     }
 
-    final public Set<String> frozen = new HashSet<String>();
+	final public Set<String> frozen = new HashSet<String>();
 
     public void freeze(final Player p) { //add the player to frozen
         frozen.add(p.getName());
