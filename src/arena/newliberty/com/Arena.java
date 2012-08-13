@@ -131,6 +131,7 @@ public class Arena extends JavaPlugin implements Listener {
             } else if (args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("l")) {
                 if (queue.remove(player)) {
                 	econ.depositPlayer(player.getPlayerListName(), getConfig().getDouble("Command.join.price"));
+                	player.teleport(player.getWorld().getSpawnLocation());
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.leave.message.success")));
                 } else {
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("Command.leave.message.error.queue")));
